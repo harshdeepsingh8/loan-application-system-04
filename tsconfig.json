@@ -15,6 +15,7 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "alwaysStrict": true,
+    "types" : ["jest"],
     "baseUrl": "./src",
     "moduleResolution": "node",
     "paths": {

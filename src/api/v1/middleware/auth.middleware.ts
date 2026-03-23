@@ -1,31 +1,31 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "../../../config/firebase";
+import jwt from "jsonwebtoken";
 import { UnauthorizedError } from "../errors/app.error";
 
-// Extend Request type (temporary casting approach)
-export const authenticate = async (
+export const authenticate = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // Get token from header
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedError("No token provided");
+      return next(new UnauthorizedError("No token provided"));
     }
 
     const token = authHeader.split(" ")[1];
 
-    // Verify token
-    const decodedToken = await auth.verifyIdToken(token);
+    if (!token) {
+      return next(new UnauthorizedError("No token provided"));
+    }
 
-    // Attach user to request
-    (req as any).user = decodedToken;
+    const decoded = jwt.verify(token, "secretkey");
+
+    (req as any).user = decoded;
 
     next();
   } catch (error) {
-    next(new UnauthorizedError("Invalid or expired token"));
+    return next(new UnauthorizedError("Invalid or expired token"));
   }
 };
